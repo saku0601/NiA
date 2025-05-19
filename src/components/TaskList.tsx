@@ -5,7 +5,7 @@ import { useSession } from 'next-auth/react';
 import { Task, User } from '@prisma/client';
 import Link from 'next/link';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { authOptions } from '@/app/api/auth/[...nextauth]/authOptions';
 
 type TaskWithRelations = Task & {
   requester: User;
