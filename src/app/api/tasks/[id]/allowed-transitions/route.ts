@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { prisma } from '@/lib/prisma';
 import { TaskStatus, UserRole } from '@prisma/client';
+import { authOptions } from '../../../auth/[...nextauth]/authOptions';
 
 interface RouteParams {
   params: {
