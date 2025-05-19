@@ -1,0 +1,77 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+enum UserRole {
+  requester
+  assignee
+}
+
+enum TaskStatus {
+  pending    // 未受注
+  accepted   // 受注済み
+  inProgress // 作業中
+  completed  // 完了
+  cancelled  // キャンセル
+}
+
+model User {
+  id            Int      @id @default(autoincrement())
+  name          String
+  email         String   @unique
+  password      String
+  role          UserRole @default(requester)
+  requestedTasks Task[]  @relation("Requester")
+  assignedTasks  Task[]  @relation("Assignee")
+  statusChanges TaskStatusHistory[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("users")
+}
+
+model Task {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String
+  status      TaskStatus @default(pending)
+  startDate   DateTime
+  endDate     DateTime
+  workDate    DateTime? // 作業予定日
+  requester   User     @relation("Requester", fields: [requesterId], references: [id])
+  requesterId Int
+  assignee    User?    @relation("Assignee", fields: [assigneeId], references: [id])
+  assigneeId  Int?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  statusHistory TaskStatusHistory[]
+
+  // 新規追加フィールド
+  workNumber   String
+  customerName String
+  carModel     String
+  taskDetail   String
+  inDate       DateTime
+  outDate      DateTime
+
+  @@map("tasks")
+}
+
+model TaskStatusHistory {
+  id        Int      @id @default(autoincrement())
+  task      Task     @relation(fields: [taskId], references: [id])
+  taskId    Int
+  status    TaskStatus
+  changedAt DateTime @default(now())
+  changedBy User     @relation(fields: [userId], references: [id])
+  userId    Int
+
+  @@index([taskId])
+  @@index([userId])
+  @@map("task_status_history")
+}
