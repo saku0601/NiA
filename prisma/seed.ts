@@ -1,21 +1,30 @@
 import { PrismaClient } from '@prisma/client';
-import bcrypt from 'bcryptjs';
+import bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
 async function main() {
-  const hashedPassword = await bcrypt.hash('NiCo', 10);
-
-  const user = await prisma.user.create({
-    data: {
-      name: 'NiCo',
-      email: 'nico@example.com',
-      password: hashedPassword,
-      role: 'requester',
+  // 既存のユーザーを確認
+  const existingUser = await prisma.user.findUnique({
+    where: {
+      email: 'test@example.com',
     },
   });
 
-  console.log('Created user:', user);
+  if (!existingUser) {
+    const password = await bcrypt.hash('password123', 10);
+    await prisma.user.create({
+      data: {
+        name: 'テストユーザー',
+        email: 'test@example.com',
+        password,
+        role: 'requester', // ←必ず小文字
+      },
+    });
+    console.log('テストユーザーを作成しました');
+  } else {
+    console.log('テストユーザーは既に存在します');
+  }
 }
 
 main()

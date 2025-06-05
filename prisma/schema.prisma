@@ -3,13 +3,14 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db"
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 enum UserRole {
-  requester
-  assignee
+  admin     // 管理者
+  requester // 依頼者
+  assignee  // 担当者
 }
 
 enum TaskStatus {

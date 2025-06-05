@@ -1,0 +1,17 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "skipLibCheck": true,
+    "outDir": ".",
+    "rootDir": "."
+  },
+  "include": [
+    "create-user.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+} 

@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && next build",
+    "build": "prisma generate --print && next build",
     "start": "next start",
     "lint": "next lint",
     "create-user": "ts-node --project tsconfig.json scripts/create-user.ts",
