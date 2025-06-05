@@ -23,15 +23,15 @@
       }
     ],
     "paths": {
-      "@/*": [
-        "./src/*"
-      ]
+      "@/*": ["./src/*"],
+      "@/lib/*": ["./src/lib/*"]
     },
     "typeRoots": [
       "./node_modules/@types",
       "./src/types"
     ],
-    "noEmit": true
+    "noEmit": true,
+    "baseUrl": "."
   },
   "include": [
     "next-env.d.ts",
