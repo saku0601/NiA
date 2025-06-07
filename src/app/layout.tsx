@@ -1,6 +1,5 @@
 import './globals.css';
 import { Inter } from 'next/font/google';
-import { NextAuthProvider } from './providers';
 import Header from '@/components/Header';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -18,12 +17,10 @@ export default function RootLayout({
   return (
     <html lang="ja">
       <body className={inter.className}>
-        <NextAuthProvider>
-          <div className="min-h-screen bg-gray-50">
-            <Header />
-            <main>{children}</main>
-          </div>
-        </NextAuthProvider>
+        <div className="min-h-screen bg-gray-50">
+          <Header />
+          <main>{children}</main>
+        </div>
       </body>
     </html>
   );

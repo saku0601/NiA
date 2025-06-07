@@ -1,38 +1,10 @@
-export const dynamic = 'force-dynamic';
-
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
 import { prisma } from '../../../../lib/prisma';
-import { authOptions } from '../../auth/[...nextauth]/authOptions';
 
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user?.email) {
-      return NextResponse.json(
-        { message: '認証が必要です。' },
-        { status: 401 }
-      );
-    }
-
-    // ユーザー情報を取得
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-    });
-
-    if (!user) {
-      return NextResponse.json(
-        { message: 'ユーザーが見つかりません。' },
-        { status: 404 }
-      );
-    }
-
-    // ユーザーが依頼した業務を取得
+    // 全ユーザーの依頼タスクを取得（認証なし）
     const tasks = await prisma.task.findMany({
-      where: {
-        requesterId: user.id,
-      },
       include: {
         assignee: {
           select: {

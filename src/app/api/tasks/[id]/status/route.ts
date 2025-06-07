@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
 import { prisma } from '@/lib/prisma';
 import { TaskStatus, UserRole } from '@prisma/client';
 
@@ -31,80 +30,28 @@ async function checkStatusTransitionPermission(
   return false;
 }
 
-export async function PUT(request: Request, { params }: RouteParams) {
+export async function PATCH(request: Request, { params }: RouteParams) {
   try {
-    const session = await getServerSession();
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: '認証が必要です' }, { status: 401 });
+    const { status, userId } = await request.json();
+    if (!status || !userId) {
+      return NextResponse.json({ error: 'statusとuserIdは必須です' }, { status: 400 });
     }
-
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
+    const updatedTask = await prisma.task.update({
+      where: { id: parseInt(params.id) },
+      data: { status },
     });
-
-    if (!user) {
-      return NextResponse.json({ error: 'ユーザーが見つかりません' }, { status: 404 });
-    }
-
-    const { status } = await request.json();
-    const taskId = parseInt(params.id);
-
-    // 現在のタスクを取得
-    const currentTask = await prisma.task.findUnique({
-      where: { id: taskId },
+    await prisma.taskStatusHistory.create({
+      data: {
+        taskId: updatedTask.id,
+        status,
+        userId,
+      },
     });
-
-    if (!currentTask) {
-      return NextResponse.json({ error: 'タスクが見つかりません' }, { status: 404 });
-    }
-
-    // ステータス遷移の権限チェック
-    const hasPermission = await checkStatusTransitionPermission(
-      currentTask.status,
-      status as TaskStatus,
-      user.role as UserRole
-    );
-
-    if (!hasPermission) {
-      return NextResponse.json(
-        { error: 'このステータス変更の権限がありません' },
-        { status: 403 }
-      );
-    }
-
-    // ステータスが変更された場合のみ更新を実行
-    if (currentTask.status !== status) {
-      const updatedTask = await prisma.$transaction(async (tx) => {
-        // タスクのステータスを更新
-        const task = await tx.task.update({
-          where: { id: taskId },
-          data: { status: status as TaskStatus },
-          include: {
-            requester: true,
-            assignee: true,
-          },
-        });
-
-        // ステータス変更履歴を記録
-        await tx.taskStatusHistory.create({
-          data: {
-            taskId: task.id,
-            status: status as TaskStatus,
-            userId: user.id,
-          },
-        });
-
-        return task;
-      });
-
-      return NextResponse.json(updatedTask);
-    }
-
-    return NextResponse.json(currentTask);
+    return NextResponse.json(updatedTask);
   } catch (error) {
     console.error('Error updating task status:', error);
     return NextResponse.json(
-      { error: 'ステータスの更新に失敗しました' },
+      { error: 'タスクステータスの更新に失敗しました' },
       { status: 500 }
     );
   }

@@ -1,31 +1,15 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from '../auth/[...nextauth]/authOptions';
 
 export async function POST(request: Request) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: '認証が必要です' }, { status: 401 });
-    }
-
     const data = await request.json();
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-    });
-
-    if (!user) {
-      return NextResponse.json({ error: 'ユーザーが見つかりません' }, { status: 404 });
-    }
-
     const inDate = data.inDate ? new Date(data.inDate) : undefined;
     const outDate = data.outDate ? new Date(data.outDate) : undefined;
 
     const task = await prisma.task.create({
       data: {
         ...data,
-        requesterId: user.id,
         startDate: inDate,
         endDate: outDate,
         inDate: inDate,

@@ -1,8 +1,6 @@
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
 import { prisma } from '@/lib/prisma';
 import { TaskStatus } from '@prisma/client';
-import { authOptions } from '../../auth/[...nextauth]/authOptions';
 
 interface RouteParams {
   params: {
@@ -12,11 +10,6 @@ interface RouteParams {
 
 export async function GET(request: Request, { params }: RouteParams) {
   try {
-    const session = await getServerSession();
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: '認証が必要です' }, { status: 401 });
-    }
-
     const task = await prisma.task.findUnique({
       where: { id: parseInt(params.id) },
       include: {
@@ -32,11 +25,9 @@ export async function GET(request: Request, { params }: RouteParams) {
         },
       },
     });
-
     if (!task) {
       return NextResponse.json({ error: 'タスクが見つかりません' }, { status: 404 });
     }
-
     return NextResponse.json(task);
   } catch (error) {
     console.error('Error fetching task:', error);
