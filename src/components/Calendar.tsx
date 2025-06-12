@@ -8,6 +8,8 @@ import interactionPlugin from '@fullcalendar/interaction';
 
 interface CalendarProps {
   onDateSelect: (date: Date) => void;
+  selectedDate: Date | null;
+  setSelectedDate: React.Dispatch<React.SetStateAction<Date | null>>;
 }
 
 interface Task {
@@ -39,11 +41,10 @@ const statusOptions = [
 
 const isBrowser = typeof window !== 'undefined';
 
-export default function Calendar({ onDateSelect }: CalendarProps) {
+export default function Calendar({ onDateSelect, selectedDate, setSelectedDate }: CalendarProps) {
   const calendarRef = useRef<FullCalendar>(null);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
 
   const fetchTasks = async () => {

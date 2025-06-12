@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { TaskStatus, UserRole } from '@prisma/client';
-import { useSession } from 'next-auth/react';
+
+// TaskStatusの型を自前で定義（Prismaからのimport不要）
+type TaskStatus = 'pending' | 'accepted' | 'inProgress' | 'completed' | 'cancelled';
 
 interface TaskStatusUpdateProps {
   taskId: number;
@@ -12,7 +13,6 @@ interface TaskStatusUpdateProps {
 
 export default function TaskStatusUpdate({ taskId, currentStatus }: TaskStatusUpdateProps) {
   const router = useRouter();
-  const { data: session } = useSession();
   const [isUpdating, setIsUpdating] = useState(false);
   const [allowedTransitions, setAllowedTransitions] = useState<TaskStatus[]>([]);
 
@@ -34,14 +34,11 @@ export default function TaskStatusUpdate({ taskId, currentStatus }: TaskStatusUp
 
   const handleStatusUpdate = async (newStatus: TaskStatus) => {
     if (newStatus === currentStatus) return;
-    
     setIsUpdating(true);
     try {
       const response = await fetch(`/api/tasks/${taskId}/status`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus }),
       });
 
@@ -63,7 +60,7 @@ export default function TaskStatusUpdate({ taskId, currentStatus }: TaskStatusUp
     const baseClass = 'px-3 py-1 rounded-full text-sm font-medium transition-colors';
     const isCurrentStatus = status === currentStatus;
     const isAllowed = allowedTransitions.includes(status);
-    
+
     if (isCurrentStatus) {
       switch (status) {
         case 'pending': return `${baseClass} bg-yellow-100 text-yellow-800`;
@@ -100,15 +97,11 @@ export default function TaskStatusUpdate({ taskId, currentStatus }: TaskStatusUp
     }
   };
 
-  if (!session?.user) {
-    return null;
-  }
-
   return (
     <div className="space-y-2">
       <h3 className="text-sm font-medium text-gray-700">ステータス更新</h3>
       <div className="flex flex-wrap gap-2">
-        {Object.values(TaskStatus).map((status) => (
+        {(Object.values(['pending', 'accepted', 'inProgress', 'completed', 'cancelled']) as TaskStatus[]).map((status) => (
           <button
             key={status}
             onClick={() => handleStatusUpdate(status)}

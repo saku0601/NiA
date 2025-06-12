@@ -40,18 +40,7 @@ export async function GET(request: Request, { params }: RouteParams) {
 
 export async function PUT(request: Request, { params }: RouteParams) {
   try {
-    const session = await getServerSession();
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: '認証が必要です' }, { status: 401 });
-    }
-
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-    });
-
-    if (!user) {
-      return NextResponse.json({ error: 'ユーザーが見つかりません' }, { status: 404 });
-    }
+    // 認証・ユーザー取得を削除
 
     const data = await request.json();
     const taskId = parseInt(params.id);
@@ -89,11 +78,13 @@ export async function PUT(request: Request, { params }: RouteParams) {
       });
 
       if (statusChanged) {
+        // userIdの部分は、認証撤廃後は適切な値をセットする必要があります
+        // ここでは仮にnullや適当な値を入れるか、履歴記録自体をスキップしてください
         await tx.taskStatusHistory.create({
           data: {
             taskId: task.id,
             status: data.status as TaskStatus,
-            userId: user.id,
+            userId: 1,
           },
         });
       }

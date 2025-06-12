@@ -30,7 +30,11 @@ export default function Home() {
   return (
     <div>
       <Navbar />
-      <Calendar selectedDate={selectedDate} setSelectedDate={setSelectedDate} />
+      <Calendar
+        selectedDate={selectedDate}
+        setSelectedDate={setSelectedDate}
+        onDateSelect={setSelectedDate}
+      />
       <button onClick={() => setShowTaskForm(!showTaskForm)}>
         {showTaskForm ? 'フォームを閉じる' : 'タスク追加'}
       </button>

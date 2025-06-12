@@ -1,17 +1,21 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
-import { Task, User } from '@prisma/client';
 import Link from 'next/link';
 
-type TaskWithRelations = Task & {
-  requester: User;
-  assignee: User | null;
+// 必要なら型を自前で定義
+type Task = {
+  id: number;
+  workNumber: string;
+  customerName: string;
+  carModel: string;
+  inDate: string | Date;
+  outDate: string | Date;
+  status: string;
+  assignee: { name: string } | null;
 };
 
 interface TaskListProps {
-  tasks: TaskWithRelations[];
+  tasks: Task[];
 }
 
 export default function TaskList({ tasks }: TaskListProps) {
